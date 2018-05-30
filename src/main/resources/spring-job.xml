@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:reg="http://www.dangdang.com/schema/ddframe/reg"
+       xmlns:job="http://www.dangdang.com/schema/ddframe/job"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.dangdang.com/schema/ddframe/reg
+                        http://www.dangdang.com/schema/ddframe/reg/reg.xsd
+                        http://www.dangdang.com/schema/ddframe/job
+                        http://www.dangdang.com/schema/ddframe/job/job.xsd">
+
+    <!-- 各个配置参数参考文档  http://elasticjob.io/docs/elastic-job-lite/02-guide/config-manual/ -->
+
+    <!--配置作业注册中心 ，注意同一个集群下的namespace要保持一致，否则不会分片，而是一个新的集群。可自定义名字-->
+    <reg:zookeeper id="regCenter" server-lists="10.0.20.121:2181,10.0.20.131:2181,10.0.20.132:2181,10.0.20.133:2181" namespace="dd-job"
+                   base-sleep-time-milliseconds="1000" max-sleep-time-milliseconds="3000" max-retries="3" session-timeout-milliseconds="10000" />
+
+    <!-- 配置作业-->
+    <!-- overwrite="true" 此参数表示，是否用本地最新配置覆盖注册中心的值 ,
+       如果为true, 机器A启动时配置sharding-total-count为 3，  如果机器B配置sharding-total-count为5，则会覆盖前面的3，
+       最终在注册中心的配置是5片
+       如果为false,则不会覆盖，只加载第一次-->
+    <job:simple id="mySimpleJob" class="com.yanming.test.jobtest.MySimpleJob" registry-center-ref="regCenter"
+                sharding-total-count="3" cron="0/5 * * * * ?" overwrite="true" monitor-execution="false"/>
+
+
+</beans>

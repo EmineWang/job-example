@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<context:component-scan base-package="com.yanming.test" />
+
+	<!--兼容性测试 -->
+	<bean id="testJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="concurrent" value="true"/>
+		<property name="targetObject" ref="task"/>
+		<property name="targetMethod" value="task1"/>
+	</bean>
+
+
+	<!--  调度触发器 -->
+
+	<bean id="testJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="testJob"/>
+		<property name="cronExpression" value="*/5 * * * * ?"/>
+	</bean>
+
+
+	<!-- 线程执行器配置，用于任务注册 -->
+	<bean id="executor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="30" />
+		<property name="maxPoolSize" value="500" />
+		<property name="queueCapacity" value="500" />
+		<property name="keepAliveSeconds" value="600" />
+	</bean>
+	<!-- 调度工厂 -->
+	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="testJobTrigger"/>
+			</list>
+		</property>
+		<property name="taskExecutor" ref="executor" />
+	</bean>
+
+</beans>
